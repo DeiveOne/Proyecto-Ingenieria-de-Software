@@ -1,227 +1,134 @@
--- =====================================================================
--- ECOBIVA - Parte 1: Seguridad, Base de Datos y Arquitectura
--- Schema alineado al Diagrama de Clases del informe (punto 5,
--- consolidado DC1 + DC2 + Csprint3)
--- =====================================================================
+CREATE DATABASE `ecobiva_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */
+/*!80016 DEFAULT ENCRYPTION='N' */;
 
--- =========================
--- TABLA EMPLEADO
--- Entidad base del dominio de RRHH, independiente de Usuario.
--- Un Empleado puede o no tener cuenta de acceso (Usuario).
--- =========================
-CREATE TABLE Empleado (
-  idEmpleado INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(100) NOT NULL,
-  documento VARCHAR(30) NOT NULL UNIQUE,
-  fechaIngreso DATE NOT NULL,
-  cargoActual VARCHAR(100) NOT NULL,
-  tarifaHora DECIMAL(10,2) NOT NULL DEFAULT 0,
-  estadoLaboral BOOLEAN NOT NULL DEFAULT TRUE
-);
+CREATE DATABASE `ecobiva_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */
+/*!80016 DEFAULT ENCRYPTION='N' */;
 
--- =========================
--- TABLA ROL
--- Catálogo de roles del sistema.
--- =========================
-CREATE TABLE Rol (
-  idRol INT AUTO_INCREMENT PRIMARY KEY,
-  nombreRol VARCHAR(50) NOT NULL UNIQUE,
-  descripcion VARCHAR(255)
-);
+CREATE TABLE `Empleado` (
+  `idEmpleado` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `documento` varchar(30) NOT NULL,
+  `fechaIngreso` date NOT NULL,
+  `cargoActual` varchar(100) NOT NULL,
+  `tarifaHora` decimal(10, 2) NOT NULL DEFAULT '0.00',
+  `estadoLaboral` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`idEmpleado`),
+  UNIQUE KEY `documento` (`documento`)
+) ENGINE = InnoDB AUTO_INCREMENT = 7 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
--- =========================
--- TABLA USUARIO
--- Cuenta de acceso al sistema. Ya NO tiene idRol directo:
--- las capacidades se determinan dinámicamente vía UsuarioRol.
--- =========================
-CREATE TABLE Usuario (
-  idUsuario INT AUTO_INCREMENT PRIMARY KEY,
-  correo VARCHAR(150) NOT NULL UNIQUE,
-  passwordHash VARCHAR(255) NOT NULL,
-  estado BOOLEAN NOT NULL DEFAULT TRUE,
-  ultimoAcceso DATETIME NULL,
-  idEmpleado INT NOT NULL,
-  FOREIGN KEY (idEmpleado) REFERENCES Empleado(idEmpleado)
-);
+CREATE TABLE `LogAuditoria` (
+  `idLog` int NOT NULL AUTO_INCREMENT,
+  `accion` varchar(100) NOT NULL,
+  `modulo` varchar(100) NOT NULL,
+  `fechaHora` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `detalle` varchar(500) DEFAULT NULL,
+  `ipOrigen` varchar(45) DEFAULT NULL,
+  `idUsuario` int DEFAULT NULL,
+  PRIMARY KEY (`idLog`),
+  KEY `idUsuario` (`idUsuario`),
+  CONSTRAINT `LogAuditoria_ibfk_1` FOREIGN KEY (`idUsuario`) REFERENCES `Usuario` (`idUsuario`)
+) ENGINE = InnoDB AUTO_INCREMENT = 20 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
--- =========================
--- TABLA USUARIORROL (entidad asociativa *..*)
--- Registra qué rol(es) tiene activo cada usuario y desde cuándo.
--- Al reasignar un rol no se sobrescribe: se cierra el registro
--- anterior con fechaFin y se crea uno nuevo (historial completo).
--- =========================
-CREATE TABLE UsuarioRol (
-  idUsuarioRol INT AUTO_INCREMENT PRIMARY KEY,
-  idUsuario INT NOT NULL,
-  idRol INT NOT NULL,
-  fechaAsignacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  fechaFin DATETIME NULL,
-  asignadoPor INT NOT NULL,
-  FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario),
-  FOREIGN KEY (idRol) REFERENCES Rol(idRol),
-  FOREIGN KEY (asignadoPor) REFERENCES Usuario(idUsuario)
-);
+CREATE TABLE `PerfilTecnico` (
+  `idPerfilTecnico` int NOT NULL AUTO_INCREMENT,
+  `idEmpleado` int NOT NULL,
+  `cargaActual` int NOT NULL DEFAULT '0',
+  `especialidad` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`idPerfilTecnico`),
+  UNIQUE KEY `idEmpleado` (`idEmpleado`),
+  CONSTRAINT `PerfilTecnico_ibfk_1` FOREIGN KEY (`idEmpleado`) REFERENCES `Empleado` (`idEmpleado`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
--- =========================
--- TABLA PERFILTECNICO
--- Ya NO hereda de Usuario. Se asocia a Empleado (1..1), porque la
--- capacidad técnica es un atributo laboral, no un tipo fijo de cuenta.
--- =========================
-CREATE TABLE PerfilTecnico (
-  idPerfilTecnico INT AUTO_INCREMENT PRIMARY KEY,
-  idEmpleado INT NOT NULL UNIQUE,
-  cargaActual INT NOT NULL DEFAULT 0,
-  especialidad VARCHAR(100),
-  FOREIGN KEY (idEmpleado) REFERENCES Empleado(idEmpleado)
-);
+CREATE TABLE `Permiso` (
+  `idPermiso` int NOT NULL AUTO_INCREMENT,
+  `modulo` varchar(50) NOT NULL,
+  `accion` varchar(30) NOT NULL,
+  `descripcion` varchar(150) DEFAULT NULL,
+  PRIMARY KEY (`idPermiso`),
+  UNIQUE KEY `uq_modulo_accion` (`modulo`,
+`accion`)
+) ENGINE = InnoDB AUTO_INCREMENT = 17 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
--- =========================
--- TABLA TOKENRECUPERACION
--- Ciclo de vida del token de recuperación de contraseña
--- (vigencia 30 minutos según el informe).
--- =========================
-CREATE TABLE TokenRecuperacion (
-  idToken INT AUTO_INCREMENT PRIMARY KEY,
-  token VARCHAR(255) NOT NULL,
-  fechaGeneracion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  fechaExpiracion DATETIME NOT NULL,
-  usado BOOLEAN NOT NULL DEFAULT FALSE,
-  idUsuario INT NOT NULL,
-  FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario)
-);
+CREATE TABLE `PreguntaSeguridad` (
+  `idPregunta` int NOT NULL AUTO_INCREMENT,
+  `textoPregunta` varchar(255) NOT NULL,
+  PRIMARY KEY (`idPregunta`),
+  UNIQUE KEY `textoPregunta` (`textoPregunta`)
+) ENGINE = InnoDB AUTO_INCREMENT = 7 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
--- =========================
--- TABLA LOGAUDITORIA
--- Registro inmutable de acciones críticas. Relación real a Usuario
--- (ya no es un campo de texto plano).
--- =========================
-CREATE TABLE LogAuditoria (
-  idLog INT AUTO_INCREMENT PRIMARY KEY,
-  accion VARCHAR(100) NOT NULL,
-  modulo VARCHAR(100) NOT NULL,
-  fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  detalle VARCHAR(500),
-  idUsuario INT NOT NULL,
-  FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario)
-);
+CREATE TABLE `Rol` (
+  `idRol` int NOT NULL AUTO_INCREMENT,
+  `nombreRol` varchar(50) NOT NULL,
+  `descripcion` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`idRol`),
+  UNIQUE KEY `nombreRol` (`nombreRol`)
+) ENGINE = InnoDB AUTO_INCREMENT = 5 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
--- =========================
--- TABLA PERMISO
--- Matriz Rol-Módulo: qué acciones están autorizadas.
--- =========================
-CREATE TABLE Permiso (
-  idPermiso INT AUTO_INCREMENT PRIMARY KEY,
-  idRol INT NOT NULL,
-  modulo VARCHAR(100) NOT NULL,
-  verAutorizado BOOLEAN NOT NULL DEFAULT FALSE,
-  crearAutorizado BOOLEAN NOT NULL DEFAULT FALSE,
-  editarAutorizado BOOLEAN NOT NULL DEFAULT FALSE,
-  eliminarAutorizado BOOLEAN NOT NULL DEFAULT FALSE,
-  FOREIGN KEY (idRol) REFERENCES Rol(idRol)
-);
+CREATE TABLE `RolPermiso` (
+  `idRol` int NOT NULL,
+  `idPermiso` int NOT NULL,
+  `permitido` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`idRol`,
+`idPermiso`),
+  KEY `idPermiso` (`idPermiso`),
+  CONSTRAINT `RolPermiso_ibfk_1` FOREIGN KEY (`idRol`) REFERENCES `Rol` (`idRol`) ON
+DELETE
+    CASCADE,
+    CONSTRAINT `RolPermiso_ibfk_2` FOREIGN KEY (`idPermiso`) REFERENCES `Permiso` (`idPermiso`) ON
+    DELETE
+        CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
--- =====================================================================
--- DATOS SEMILLA
--- =====================================================================
+CREATE TABLE `TokenRecuperacion` (
+  `idToken` int NOT NULL AUTO_INCREMENT,
+  `token` varchar(255) NOT NULL,
+  `fechaGeneracion` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fechaExpiracion` datetime NOT NULL,
+  `usado` tinyint(1) NOT NULL DEFAULT '0',
+  `idUsuario` int NOT NULL,
+  PRIMARY KEY (`idToken`),
+  KEY `idUsuario` (`idUsuario`),
+  CONSTRAINT `TokenRecuperacion_ibfk_1` FOREIGN KEY (`idUsuario`) REFERENCES `Usuario` (`idUsuario`)
+) ENGINE = InnoDB AUTO_INCREMENT = 6 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
--- Roles base
-INSERT INTO Rol (nombreRol, descripcion) VALUES
-('Admin', 'Administrador del sistema con acceso total'),
-('Tecnico', 'Encargado de diagnóstico y reparación de vehículos'),
-('Asesor', 'Encargado de atención al cliente y órdenes de servicio');
+CREATE TABLE `Usuario` (
+  `idUsuario` int NOT NULL AUTO_INCREMENT,
+  `correo` varchar(150) NOT NULL,
+  `passwordHash` varchar(255) NOT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT '1',
+  `ultimoAcceso` datetime DEFAULT NULL,
+  `idEmpleado` int NOT NULL,
+  PRIMARY KEY (`idUsuario`),
+  UNIQUE KEY `correo` (`correo`),
+  KEY `idEmpleado` (`idEmpleado`),
+  CONSTRAINT `Usuario_ibfk_1` FOREIGN KEY (`idEmpleado`) REFERENCES `Empleado` (`idEmpleado`)
+) ENGINE = InnoDB AUTO_INCREMENT = 7 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
--- Empleado de prueba (necesario porque Usuario depende de Empleado)
-INSERT INTO Empleado (nombre, documento, fechaIngreso, cargoActual, tarifaHora, estadoLaboral) VALUES
-('Administrador Prueba', '0000000000', CURDATE(), 'Administrador', 0, TRUE);
+CREATE TABLE `UsuarioPreguntaSeguridad` (
+  `idUsuarioPregunta` int NOT NULL AUTO_INCREMENT,
+  `idUsuario` int NOT NULL,
+  `idPregunta` int NOT NULL,
+  `respuestaHash` varchar(255) NOT NULL,
+  PRIMARY KEY (`idUsuarioPregunta`),
+  UNIQUE KEY `unico_usuario_pregunta` (`idUsuario`,
+`idPregunta`),
+  KEY `idPregunta` (`idPregunta`),
+  CONSTRAINT `UsuarioPreguntaSeguridad_ibfk_1` FOREIGN KEY (`idUsuario`) REFERENCES `Usuario` (`idUsuario`),
+  CONSTRAINT `UsuarioPreguntaSeguridad_ibfk_2` FOREIGN KEY (`idPregunta`) REFERENCES `PreguntaSeguridad` (`idPregunta`)
+) ENGINE = InnoDB AUTO_INCREMENT = 17 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
 
--- Nota: el Usuario admin de prueba y su UsuarioRol se insertan desde
--- Node (seed.js), porque el passwordHash debe generarse con bcrypt,
--- no puede ir en texto plano ni un hash fijo en SQL.
-
--- ============================================================
--- ECOBIVA - Parte 1
--- Script CORREGIDO tras comparar contra CodigoActual.sql real.
--- Ejecutar en DBeaver con "File -> Open File" (no copiar/pegar)
---
--- NOTA: LogAuditoria y Permiso YA existen en tu BD con la forma correcta
--- (fechaHora, ipOrigen, idUsuario nullable; Permiso con modulo/accion).
--- Este script NO las toca. Solo falta la tabla intermedia RolPermiso.
--- ============================================================
-
--- --------------------------------------------------------
--- 1. Matriz Rol <-> Permiso (many-to-many) — única tabla que falta
--- --------------------------------------------------------
-CREATE TABLE IF NOT EXISTS RolPermiso (
-    idRol         INT NOT NULL,
-    idPermiso     INT NOT NULL,
-    permitido     BOOLEAN NOT NULL DEFAULT TRUE,
-    PRIMARY KEY (idRol, idPermiso),
-    FOREIGN KEY (idRol) REFERENCES Rol(idRol) ON DELETE CASCADE,
-    FOREIGN KEY (idPermiso) REFERENCES Permiso(idPermiso) ON DELETE CASCADE
-);
-
--- --------------------------------------------------------
--- 2. (Opcional / verificación) Catálogo de permisos.
---    Tu tabla Permiso ya tiene 16 filas (AUTO_INCREMENT=17), que coinciden
---    con este catálogo. Este INSERT IGNORE es solo un seguro por si falta
---    alguno; no duplica nada gracias a la UNIQUE KEY (modulo, accion).
--- --------------------------------------------------------
-INSERT IGNORE INTO Permiso (modulo, accion, descripcion) VALUES
-('usuarios',   'crear',    'Crear usuarios del sistema'),
-('usuarios',   'leer',     'Consultar usuarios'),
-('usuarios',   'editar',   'Editar usuarios'),
-('usuarios',   'eliminar', 'Desactivar usuarios'),
-('roles',      'leer',     'Consultar roles'),
-('permisos',   'leer',     'Ver matriz de permisos'),
-('permisos',   'editar',   'Editar matriz de permisos'),
-('auditoria',  'leer',     'Consultar log de auditoría'),
-('auditoria',  'exportar', 'Exportar log de auditoría'),
-('ordenes',    'crear',    'Crear órdenes de servicio'),
-('ordenes',    'leer',     'Consultar órdenes de servicio'),
-('ordenes',    'editar',   'Editar órdenes de servicio'),
-('diagnostico','crear',    'Registrar diagnósticos'),
-('diagnostico','editar',   'Editar diagnósticos y reparaciones'),
-('inventario', 'leer',     'Consultar inventario/kardex'),
-('inventario', 'editar',   'Editar movimientos de inventario');
-
--- --------------------------------------------------------
--- 3. Seed: asignación inicial de permisos por rol.
---    Usamos subconsultas por `nombreRol` en vez de ids fijos, porque no
---    sabemos con certeza si Admin/Tecnico/Asesor son 1/2/3 en tu tabla Rol.
---    AJUSTA los strings 'Admin', 'Tecnico', 'Asesor' si en tu tabla Rol
---    los nombres están escritos distinto (ej. con tilde, mayúsculas, etc).
--- --------------------------------------------------------
-
--- Verifica primero cómo están escritos tus roles:
--- SELECT idRol, nombreRol FROM Rol;
-
--- Admin: acceso total a todo el catálogo
-INSERT IGNORE INTO RolPermiso (idRol, idPermiso, permitido)
-SELECT (SELECT idRol FROM Rol WHERE nombreRol = 'Admin'), idPermiso, TRUE
-FROM Permiso
-WHERE (SELECT idRol FROM Rol WHERE nombreRol = 'Admin') IS NOT NULL;
-
--- Tecnico: diagnóstico/reparación + lectura de órdenes e inventario
-INSERT IGNORE INTO RolPermiso (idRol, idPermiso, permitido)
-SELECT (SELECT idRol FROM Rol WHERE nombreRol = 'Tecnico'), idPermiso, TRUE
-FROM Permiso
-WHERE ((modulo = 'diagnostico')
-    OR (modulo = 'ordenes' AND accion = 'leer')
-    OR (modulo = 'inventario'))
-  AND (SELECT idRol FROM Rol WHERE nombreRol = 'Tecnico') IS NOT NULL;
-
--- Asesor: atención al cliente y órdenes de servicio
-INSERT IGNORE INTO RolPermiso (idRol, idPermiso, permitido)
-SELECT (SELECT idRol FROM Rol WHERE nombreRol = 'Asesor'), idPermiso, TRUE
-FROM Permiso
-WHERE (modulo = 'ordenes' OR (modulo = 'inventario' AND accion = 'leer'))
-  AND (SELECT idRol FROM Rol WHERE nombreRol = 'Asesor') IS NOT NULL;
-
--- --------------------------------------------------------
--- 4. Verificación final: ver la matriz recién creada
--- --------------------------------------------------------
--- SELECT r.nombreRol, p.modulo, p.accion, rp.permitido
--- FROM RolPermiso rp
--- JOIN Rol r ON r.idRol = rp.idRol
--- JOIN Permiso p ON p.idPermiso = rp.idPermiso
--- ORDER BY r.nombreRol, p.modulo, p.accion;
+CREATE TABLE `UsuarioRol` (
+  `idUsuarioRol` int NOT NULL AUTO_INCREMENT,
+  `idUsuario` int NOT NULL,
+  `idRol` int NOT NULL,
+  `fechaAsignacion` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fechaFin` datetime DEFAULT NULL,
+  `asignadoPor` int NOT NULL,
+  PRIMARY KEY (`idUsuarioRol`),
+  KEY `idUsuario` (`idUsuario`),
+  KEY `idRol` (`idRol`),
+  KEY `asignadoPor` (`asignadoPor`),
+  CONSTRAINT `UsuarioRol_ibfk_1` FOREIGN KEY (`idUsuario`) REFERENCES `Usuario` (`idUsuario`),
+  CONSTRAINT `UsuarioRol_ibfk_2` FOREIGN KEY (`idRol`) REFERENCES `Rol` (`idRol`),
+  CONSTRAINT `UsuarioRol_ibfk_3` FOREIGN KEY (`asignadoPor`) REFERENCES `Usuario` (`idUsuario`)
+) ENGINE = InnoDB AUTO_INCREMENT = 13 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
