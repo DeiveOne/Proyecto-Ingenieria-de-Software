@@ -35,7 +35,7 @@ export default function Login() {
               type="email"
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
-              placeholder="admin@ecobiva.com"
+              placeholder="user@ecobiva.com"
               required
             />
           </div>

@@ -3,9 +3,12 @@ const router = express.Router();
 
 const auditoriaController = require('../controllers/auditoriaController');
 const verificarToken = require('../middlewares/verificarToken');
-const verificarPermiso = require('../middlewares/verificarPermiso');
+const verificarRol = require('../middlewares/verificarRol');
 
-router.get('/', verificarToken, verificarPermiso('auditoria', 'leer'), auditoriaController.consultar);
-router.get('/exportar', verificarToken, verificarPermiso('auditoria', 'exportar'), auditoriaController.exportar);
+router.use(verificarToken);
 
+// Endpoint GET /api/auditoria?usuario=&modulo=&desde=&hasta= (con filtros)
+router.get('/', verificarRol(['Admin']), auditoriaController.consultar);
+// Endpoint GET /api/auditoria/exportar (PDF o Excel/CSV)
+router.get('/exportar', verificarRol(['Admin']), auditoriaController.exportar);
 module.exports = router;

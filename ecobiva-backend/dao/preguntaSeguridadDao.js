@@ -1,3 +1,4 @@
+const { Connection } = require('mysql2');
 const pool = require('../config/db');
 
 async function listarCatalogo() {
@@ -11,10 +12,11 @@ async function listarCatalogo() {
  * Guarda las 3 preguntas+respuestas elegidas por el usuario.
  * Si ya tenía preguntas configuradas, las reemplaza (borra las viejas).
  */
-async function configurar(idUsuario, preguntasConRespuestaHash) {
-  const conn = await pool.getConnection();
+async function configurar(idUsuario, preguntasConRespuestaHash, connExternal = null) {
+  // Si viene una conexion externa ( como la del controlador), usamos esa. SI no, pedimos una nueva.
+  const conn = connExternal || await pool.getConnection();
   try {
-    await conn.beginTransaction();
+    if (!connExternal) await conn.beginTransaction();
 
     await conn.execute(
       'DELETE FROM UsuarioPreguntaSeguridad WHERE idUsuario = ?',
@@ -29,12 +31,12 @@ async function configurar(idUsuario, preguntasConRespuestaHash) {
       );
     }
 
-    await conn.commit();
+    if (!connExternal) await conn.commit();
   } catch (err) {
-    await conn.rollback();
+    if (!connExternal)await conn.rollback();
     throw err;
   } finally {
-    conn.release();
+    if (!connExternal)conn.release();
   }
 }
 

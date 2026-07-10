@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const usuarioDao = require('../dao/usuarioDao');
+// 1. Importamos la función del helper de auditoría
+const { registrarAccion } = require('../utils/auditoria');
 
 async function login(req, res) {
   try {
@@ -13,7 +15,6 @@ async function login(req, res) {
     const usuario = await usuarioDao.obtenerPorCorreo(correo);
 
     if (!usuario) {
-      // Mensaje genérico a propósito: no revelar si el correo existe o no
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
@@ -38,6 +39,17 @@ async function login(req, res) {
     });
 
     await usuarioDao.actualizarUltimoAcceso(usuario.idUsuario);
+
+    // ====================================================================
+    // 2. REGISTRO DE AUDITORÍA (Aquí aplicamos el idUsuarioOverride de forma explícita)
+    // ====================================================================
+    await registrarAccion(req, {
+      accion: 'LOGIN',
+      modulo: 'AUTH',
+      detalle: `Inicio de sesión exitoso para el correo: ${usuario.correo}`,
+      idUsuarioOverride: usuario.idUsuario
+    });
+    // ====================================================================
 
     return res.json({
       token,

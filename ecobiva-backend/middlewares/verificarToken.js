@@ -28,6 +28,7 @@ function verificarToken(req, res, next) {
     req.usuario = payload; // { idUsuario, correo, roles }
     next();
   });
+  
 }
 
 module.exports = verificarToken;

@@ -50,7 +50,7 @@ async function cambiarPassword(req, res) {
 
         await registrarAccion(req, {
             accion: 'CAMBIO_PASSWORD',
-            modulo: 'perfil',
+            modulo: 'PERFIL',
             detalle: 'El usuario cambió su contraseña desde el perfil'
         });
 

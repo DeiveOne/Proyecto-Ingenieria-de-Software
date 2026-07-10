@@ -3,7 +3,7 @@ const usuarioDao = require('../dao/usuarioDao');
 const preguntaSeguridadDao = require('../dao/preguntaSeguridadDao');
 const tokenRecuperacionDao = require('../dao/tokenRecuperacionDao');
 const validarPassword = require('../utils/validarPassword');
-
+const { registrarAccion } = require('../utils/auditoria');
 /**
  * GET /api/auth/preguntas-catalogo
  * Público: catálogo completo para que el usuario elija 3 al configurar.
@@ -168,6 +168,13 @@ async function resetPassword(req, res) {
     await usuarioDao.actualizarPasswordHash(registro.idUsuario, passwordHash);
     await tokenRecuperacionDao.marcarUsado(registro.idToken);
 
+    await registrarAccion(req, {
+        accion: 'RESET_PASSWORD',
+        modulo: 'AUTH',
+        detalle: 'Restablecimiento de contraseña exitoso mediante preguntas de seguridad',
+        idUsuarioOverride: registro.idUsuario // <-- Forzamos el ID del dueño de la cuenta
+    });
+    
     return res.json({ mensaje: 'Contraseña actualizada con éxito' });
   } catch (error) {
     console.error('Error en reset password:', error);

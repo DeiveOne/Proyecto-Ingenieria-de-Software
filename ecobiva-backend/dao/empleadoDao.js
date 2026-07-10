@@ -17,4 +17,21 @@ async function obtenerPorDocumento(documento) {
   return rows[0] || null;
 }
 
-module.exports = { crear, obtenerPorDocumento };
+
+
+async function actualizarInformacionLaboral(idEmpleado, { cargoActual, tarifaHora }, connection = null) {
+  const query = `
+    UPDATE Empleado 
+    SET cargoActual = ?, tarifaHora = ? 
+    WHERE idEmpleado = ?
+  `;
+  const params = [cargoActual, tarifaHora, idEmpleado];
+  
+  // Si usas transacciones usará 'connection', de lo contrario usará el 'pool' global
+  const executor = connection || pool; 
+  
+  const [resultado] = await executor.query(query, params);
+  return resultado;
+}
+
+module.exports = { crear, obtenerPorDocumento, actualizarInformacionLaboral };
