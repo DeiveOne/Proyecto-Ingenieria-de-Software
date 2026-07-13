@@ -13,6 +13,11 @@ const perfilRoutes = require("./routes/perfilRoutes");
 const empleadoRoutes = require("./routes/empleadoRoutes");
 const historialCargoRoutes = require("./routes/historialCargoRoutes");
 const nominaRoutes = require("./routes/nominaRoutes");
+const clienteRoutes = require("./routes/clienteRoutes");
+const vehiculoRoutes = require("./routes/vehiculoRoutes");
+const repuestoRoutes = require("./routes/repuestoRoutes");
+const bateriaRoutes = require("./routes/bateriaRoutes");
+const kardexRoutes = require("./routes/kardexRoutes");
 
 const app = express();
 
@@ -32,6 +37,11 @@ app.use("/api/perfil", perfilRoutes);
 app.use("/api/empleados", empleadoRoutes);
 app.use("/api/historial-cargo", historialCargoRoutes);
 app.use("/api/nominas", nominaRoutes);
+app.use("/api/clientes", clienteRoutes);
+app.use("/api/vehiculos", vehiculoRoutes);
+app.use("/api/repuestos", repuestoRoutes);
+app.use("/api/baterias", bateriaRoutes);
+app.use("/api/kardex", kardexRoutes);
 
 // Ruta de prueba para confirmar que los middlewares funcionan.
 app.get(
