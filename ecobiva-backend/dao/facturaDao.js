@@ -90,6 +90,13 @@ async function crearFacturaReparacion(idOrdenServicio, datos, idUsuario) {
     const impuestos = Number(datos.impuestos || 0);
     const total = subtotalManoObra + subtotalRepuestos + impuestos - descuento;
 
+    if ([subtotalManoObra, subtotalRepuestos, descuento, impuestos].some((valor) => !Number.isFinite(valor) || valor < 0)) {
+      throw new Error("Los valores de la factura deben ser números positivos.");
+    }
+    if (total < 0) {
+      throw new Error("El descuento no puede superar el valor facturado.");
+    }
+
     const numeroFactura = await generarNumeroFactura(connection);
 
     const [result] = await connection.query(

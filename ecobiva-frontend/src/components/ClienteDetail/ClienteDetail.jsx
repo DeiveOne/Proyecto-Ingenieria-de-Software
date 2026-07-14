@@ -18,11 +18,6 @@ export default function ClienteDetail({cliente}){
                 <div className="detailGrid">
 
                     <DataField
-                        label="Tipo Documento"
-                        value={cliente.tipoDocumento}
-                    />
-
-                    <DataField
                         label="Documento"
                         value={cliente.documento}
                     />
@@ -44,12 +39,7 @@ export default function ClienteDetail({cliente}){
 
                     <DataField
                         label="Ciudad"
-                        value={cliente.ciudad}
-                    />
-
-                    <DataField
-                        label="Dirección"
-                        value={cliente.direccion}
+                        value="Bogotá D.C."
                     />
 
                 </div>
@@ -76,26 +66,6 @@ export default function ClienteDetail({cliente}){
 
                     </div>
 
-                    <DataField
-                        label="Fecha Registro"
-                        value={cliente.fechaRegistro}
-                    />
-
-                    <DataField
-                        label="Última Visita"
-                        value={cliente.ultimaVisita}
-                    />
-
-                    <DataField
-                        label="Órdenes Registradas"
-                        value={cliente.ordenes}
-                    />
-
-                    <DataField
-                        label="Garantías Activas"
-                        value={cliente.garantias}
-                    />
-
                 </div>
 
             </section>
@@ -116,7 +86,6 @@ export default function ClienteDetail({cliente}){
 
                             <th>Modelo</th>
 
-                            <th>Estado</th>
 
                         </tr>
 
@@ -132,16 +101,11 @@ export default function ClienteDetail({cliente}){
                                         <td>{v.placa}</td>
                                         <td>{v.marca}</td>
                                         <td>{v.modelo}</td>
-                                        <td>
-                                            <StatusBadge
-                                                status={v.estado}
-                                            />
-                                        </td>
                                     </tr>
                                 ))
                                 :
                                 <tr>
-                                    <td colSpan="4">No hay vehículos registrados.</td>
+                                    <td colSpan="3">No hay vehículos registrados.</td>
                                 </tr>
 
                         }

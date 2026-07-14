@@ -142,7 +142,7 @@ async function actualizarEstado(req, res) {
 }
 
 async function registrarAprobacion(req, res) {
-  const { aprobado, notas } = req.body;
+  const { aprobado, notas, imagenFirma, metodoCaptura, terminosAceptados } = req.body;
 
   if (typeof aprobado !== "boolean") {
     return res.status(400).json({
@@ -158,7 +158,7 @@ async function registrarAprobacion(req, res) {
 
     const { orden, facturaDiagnostico } = await ordenDao.registrarAprobacion(
       req.params.id,
-      { aprobado, notas },
+      { aprobado, notas, imagenFirma, metodoCaptura, terminosAceptados },
       req.usuario.idUsuario,
     );
 
@@ -167,7 +167,7 @@ async function registrarAprobacion(req, res) {
       modulo: "ORDENES",
       detalle: `Orden ${orden.folio}: cliente ${aprobado ? "aprobó" : "rechazó"} el diagnóstico${
         notas ? ` (Notas: ${notas})` : ""
-      }${facturaDiagnostico ? ` — se generó factura ${facturaDiagnostico.numeroFactura} por diagnóstico profundo` : ""}`,
+      }${facturaDiagnostico ? ` — se generó factura ${facturaDiagnostico.numeroFactura} por diagnóstico profundo` : ""} (Método de captura: ${metodoCaptura || "remoto_asesor"})`,
     });
 
     return res.json({ orden, facturaDiagnostico });

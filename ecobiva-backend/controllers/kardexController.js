@@ -1,4 +1,5 @@
 const kardexDao = require('../dao/kardexDao');
+const { registrarAccion } = require('../utils/auditoria');
 
 async function listar(req, res) {
   try {
@@ -26,9 +27,9 @@ async function obtenerPorId(req, res) {
 }
 
 async function crear(req, res) {
-  const { tipoMovimiento, fecha, codigoProducto, cantidad, precioUnitario, total, observaciones, productoTipo, idProducto } = req.body;
+  const { tipoMovimiento, fecha, cantidad, idRepuesto, idOrdenServicio, observaciones } = req.body;
 
-  if (!tipoMovimiento || !codigoProducto || !cantidad || !productoTipo) {
+  if (!tipoMovimiento || !cantidad || !idRepuesto) {
     return res.status(400).json({ error: 'Tipo de movimiento, código de producto, cantidad y tipo de producto son obligatorios' });
   }
 
@@ -36,13 +37,17 @@ async function crear(req, res) {
     const idKardex = await kardexDao.crear({
       tipoMovimiento,
       fecha,
-      codigoProducto,
       cantidad,
-      precioUnitario,
-      total,
       observaciones,
-      productoTipo,
-      idProducto
+      idRepuesto,
+      idOrdenServicio,
+      idUsuario: req.usuario.idUsuario
+    });
+
+    await registrarAccion(req, {
+      accion: 'CREAR_KARDEX',
+      modulo: 'INVENTARIO',
+      detalle: `Movimiento de ${tipoMovimiento} registrado para repuesto #${idRepuesto}. Cantidad: ${cantidad}, Orden: ${idOrdenServicio || 'N/A'}, Usuario: ${req.usuario.idUsuario}`
     });
 
     return res.status(201).json({ mensaje: 'Movimiento registrado correctamente', idKardex });

@@ -5,6 +5,7 @@ import "./styles/dashboard.css";
 import App from "./App";
 
 import "./assets/css/global.css";
+import "./styles/responsive.css";
 
 import { LayoutProvider } from "./context/LayoutContext";
 import { AuthProvider } from "./context/AuthContext";

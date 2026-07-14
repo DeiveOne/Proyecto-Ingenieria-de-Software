@@ -1,4 +1,6 @@
 const repuestoDao = require('../dao/repuestoDao');
+const { registrarAccion } = require('../utils/auditoria');
+const alertaStockDao = require('../dao/alertaStockDao');
 
 async function listar(req, res) {
   try {
@@ -42,6 +44,14 @@ async function crear(req, res) {
       stockMinimo
     });
 
+    await registrarAccion(req, {
+      accion: 'CREAR_REPUESTO',
+      modulo: 'INVENTARIO',
+      detalle: `Repuesto "${nombre}" creado. Precio: ${precioUnitario || 0}, Stock: ${stockActual || 0}`
+    });
+
+    await alertaStockDao.generarSiStockBajo(idRepuesto);
+
     return res.status(201).json({ mensaje: 'Repuesto creado correctamente', idRepuesto });
   } catch (error) {
     console.error('Error al crear repuesto:', error);
@@ -72,6 +82,14 @@ async function actualizar(req, res) {
       stockMinimo
     });
 
+    await alertaStockDao.generarSiStockBajo(id);
+
+    await registrarAccion(req, {
+      accion: 'ACTUALIZAR_REPUESTO',
+      modulo: 'INVENTARIO',
+      detalle: `Repuesto "${repuesto.nombre}" (#${id}) actualizado. Precio anterior: ${repuesto.precioUnitario}, nuevo: ${precioUnitario}. Stock anterior: ${repuesto.stockActual}, nuevo: ${stockActual}`
+    });
+
     return res.json({ mensaje: 'Repuesto actualizado correctamente' });
   } catch (error) {
     console.error('Error al actualizar repuesto:', error);
@@ -89,10 +107,17 @@ async function eliminar(req, res) {
     }
 
     await repuestoDao.eliminar(id);
-    return res.json({ mensaje: 'Repuesto eliminado correctamente' });
+
+    await registrarAccion(req, {
+      accion: 'ELIMINAR_REPUESTO',
+      modulo: 'INVENTARIO',
+      detalle: `Repuesto "${repuesto.nombre}" (#${id}) dado de baja. Stock previo: ${repuesto.stockActual}, Precio unitario: ${repuesto.precioUnitario}`
+    });
+
+    return res.json({ mensaje: 'Repuesto dado de baja correctamente. Su historial se conserva.' });
   } catch (error) {
     console.error('Error al eliminar repuesto:', error);
-    return res.status(500).json({ error: 'Error interno del servidor' });
+    return res.status(400).json({ error: error.message || 'No fue posible dar de baja el repuesto' });
   }
 }
 

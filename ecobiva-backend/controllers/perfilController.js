@@ -115,16 +115,14 @@ async function actualizarMiPerfil(req, res) {
             return res.status(404).json({ error: 'Perfil no encontrado' });
         }
 
+        let correoCambio = false;
+        if (correo && correo !== perfil.correo) {
+            await usuarioDao.actualizarCorreo(idUsuario, correo); // fails first if duplicate
+            correoCambio = true;
+        }
         if (telefono !== undefined) {
             await perfilDao.actualizarTelefono(perfil.idEmpleado, telefono || null);
         }
-
-        let correoCambio = false;
-        if (correo && correo !== perfil.correo) {
-            await usuarioDao.actualizarCorreo(idUsuario, correo);
-            correoCambio = true;
-        }
-
         await registrarAccion(req, {
             accion: 'ACTUALIZAR_PERFIL',
             modulo: 'PERFIL',

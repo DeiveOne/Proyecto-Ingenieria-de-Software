@@ -17,6 +17,8 @@ import {
   FaUserTie,
   FaExchangeAlt,
   FaMoneyCheckAlt,
+  FaExclamationTriangle,
+  FaFileContract,
 } from "react-icons/fa";
 
 import { Link, useLocation } from "react-router-dom";
@@ -53,6 +55,18 @@ const MENU = [
     nombre: "Inventario",
     ruta: "/inventario",
     icono: <FaWarehouse />,
+    roles: ["Admin"],
+  },
+  {
+    nombre: "Alertas de stock",
+    ruta: "/alertas-stock",
+    icono: <FaExclamationTriangle />,
+    roles: ["Admin", "Asesor"],
+  },
+  {
+    nombre: "Términos de garantía",
+    ruta: "/terminos-garantia",
+    icono: <FaFileContract />,
     roles: ["Admin"],
   },
   {

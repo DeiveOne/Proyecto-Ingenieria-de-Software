@@ -432,12 +432,12 @@ async function actualizarEstado(idOrden, estadoNuevo, motivo, idUsuario) {
     // No se puede marcar como entregada sin haber facturado la reparación.
     if (estadoNuevo === "entregada") {
       const [facturas] = await connection.query(
-        "SELECT idFactura FROM Factura WHERE idOrdenServicio = ? AND tipo = 'reparacion'",
+        "SELECT idFactura FROM Factura WHERE idOrdenServicio = ? AND tipo = 'reparacion' AND pagoConfirmado = 1",
         [idOrden],
       );
       if (facturas.length === 0) {
         throw new Error(
-          "No se puede entregar la orden sin haberla facturado primero (POST /api/facturas).",
+          "No se puede entregar la orden sin una factura de reparaci\u00f3n con pago confirmado.",
         );
       }
     }
@@ -556,18 +556,15 @@ async function eliminarOCancelar(idOrden, idUsuario) {
  * una orden que está en "pendiente_aprobacion" (o "rechazada", si el
  * cliente había dicho que no y ahora cambió de opinión).
  *
- * Hoy en día la aprobación se captura de forma remota (el asesor llama o
- * le manda el diagnóstico al cliente por fuera del sistema, y es el propio
- * asesor quien marca el resultado acá) — por eso FirmaDigital queda sin
- * imagenFirma y con metodoCaptura = 'remoto_asesor'. El día que haya firma
- * real en tablet/celular, solo hay que mandar imagenFirma y otro
- * metodoCaptura; el resto de la lógica no cambia.
- *
+ * Soporta dos métodos de captura:
+ * - 'remoto_asesor': Sin firma real, solo aprobación telefónica (imagenFirma = NULL)
+ * - 'canvas_cliente': Con firma dibujada en canvas (imagenFirma = base64 de imagen)
+ * 
  * Si el cliente rechaza un diagnóstico "profundo" que tenía costo, se
  * genera automáticamente una Factura tipo 'diagnostico' por ese valor
  * (el diagnóstico "superficial" es gratis y no genera factura).
  */
-async function registrarAprobacion(idOrden, { aprobado, notas }, idUsuario) {
+async function registrarAprobacion(idOrden, { aprobado, notas, imagenFirma, metodoCaptura, terminosAceptados }, idUsuario) {
   const connection = await pool.getConnection();
 
   try {
@@ -592,13 +589,23 @@ async function registrarAprobacion(idOrden, { aprobado, notas }, idUsuario) {
       );
     }
 
+    const metodoFinal = metodoCaptura || "remoto_asesor";
+    const firmaFinal = imagenFirma || null;
+    if (metodoFinal === "canvas_cliente" && (!firmaFinal || !firmaFinal.startsWith("data:image/"))) {
+      throw new Error("La firma capturada no es válida.");
+    }
+    if (aprobado && !terminosAceptados) {
+      throw new Error("El cliente debe aceptar los términos antes de aprobar el diagnóstico.");
+    }
+    const terminosFlag = terminosAceptados ? 1 : 0;
+
     await connection.query(
       `
             INSERT INTO FirmaDigital
             (imagenFirma, metodoCaptura, terminosAceptados, idOrden)
-            VALUES (NULL, 'remoto_asesor', ?, ?)
+            VALUES (?, ?, ?, ?)
         `,
-      [aprobado ? 1 : 0, idOrden],
+      [firmaFinal, metodoFinal, terminosFlag, idOrden],
     );
 
     await connection.query(

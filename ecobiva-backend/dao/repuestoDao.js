@@ -11,7 +11,7 @@ async function listarTodos() {
             END AS estado
      FROM Repuesto r
      LEFT JOIN Bateria b ON r.idRepuesto = b.idRepuesto
-     WHERE b.idRepuesto IS NULL
+     WHERE b.idRepuesto IS NULL AND r.activo = 1
      ORDER BY r.idRepuesto DESC`,
   );
   return rows;
@@ -68,7 +68,13 @@ async function actualizar(idRepuesto, repuesto) {
 }
 
 async function eliminar(idRepuesto) {
-  await pool.execute(`DELETE FROM Repuesto WHERE idRepuesto = ?`, [idRepuesto]);
+  const [result] = await pool.execute(
+    `UPDATE Repuesto SET activo = 0 WHERE idRepuesto = ? AND activo = 1`,
+    [idRepuesto],
+  );
+  if (result.affectedRows === 0) {
+    throw new Error("El repuesto ya estaba inactivo o no existe.");
+  }
 }
 
 module.exports = {

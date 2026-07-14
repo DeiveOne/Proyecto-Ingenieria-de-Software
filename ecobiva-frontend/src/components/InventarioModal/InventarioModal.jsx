@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Modal from "../Modal/Modal";
 import Button from "../Button/Button";
 import Input from "../Input/Input";
+import { obtenerVehiculos } from "../../services/vehiculoService";
 import "./InventarioModal.css";
 
 const REPUESTO_INICIAL = {
@@ -11,7 +12,6 @@ const REPUESTO_INICIAL = {
   proveedor: "",
   stockActual: "",
   stockMinimo: "",
-  estado: "",
 };
 
 const BATERIA_INICIAL = {
@@ -29,6 +29,7 @@ const BATERIA_INICIAL = {
 export default function InventarioModal({ open, modo, productoEditar, onClose, onSave }) {
   const [form, setForm] = useState(modo === "baterias" ? BATERIA_INICIAL : REPUESTO_INICIAL);
   const [errores, setErrores] = useState({});
+  const [vehiculos, setVehiculos] = useState([]);
 
   useEffect(() => {
     if (!open) return;
@@ -58,7 +59,6 @@ export default function InventarioModal({ open, modo, productoEditar, onClose, o
           proveedor: productoEditar.proveedor || "",
           stockActual: productoEditar.stockActual || "",
           stockMinimo: productoEditar.stockMinimo || "",
-          estado: productoEditar.estado || "",
         });
       } else {
         setForm(REPUESTO_INICIAL);
@@ -66,6 +66,10 @@ export default function InventarioModal({ open, modo, productoEditar, onClose, o
     }
 
     setErrores({});
+
+    if (modo === "baterias") {
+      obtenerVehiculos().then((data) => setVehiculos(Array.isArray(data) ? data : [])).catch(console.error);
+    }
   }, [open, modo, productoEditar]);
 
   if (!open) return null;
@@ -99,6 +103,7 @@ export default function InventarioModal({ open, modo, productoEditar, onClose, o
         stockMinimo: modo === "repuestos" ? Number(form.stockMinimo) : undefined,
         voltajeFinal: modo === "baterias" ? Number(form.voltajeFinal) : undefined,
         amperajeFinal: modo === "baterias" ? Number(form.amperajeFinal) : undefined,
+        idVehiculo: modo === "baterias" && form.idVehiculo ? Number(form.idVehiculo) : null,
       });
     }
 
@@ -178,11 +183,20 @@ export default function InventarioModal({ open, modo, productoEditar, onClose, o
               error={errores.amperajeFinal}
               onChange={(e) => setForm({ ...form, amperajeFinal: e.target.value })}
             />
-            <Input
-              label="ID Vehículo"
-              value={form.idVehiculo}
-              onChange={(e) => setForm({ ...form, idVehiculo: e.target.value })}
-            />
+            <div className="inputGroup">
+              <label>Vehículo instalado (opcional)</label>
+              <select
+                value={form.idVehiculo}
+                onChange={(e) => setForm({ ...form, idVehiculo: e.target.value })}
+              >
+                <option value="">Sin asignar</option>
+                {vehiculos.map((vehiculo) => (
+                  <option key={vehiculo.idVehiculo} value={vehiculo.idVehiculo}>
+                    {vehiculo.placa} - {vehiculo.marca} {vehiculo.modelo}
+                  </option>
+                ))}
+              </select>
+            </div>
           </>
         )}
 
@@ -204,11 +218,13 @@ export default function InventarioModal({ open, modo, productoEditar, onClose, o
           onChange={(e) => setForm({ ...form, stockActual: e.target.value })}
         />
 
-        <Input
-          label="Estado"
-          value={form.estado}
-          onChange={(e) => setForm({ ...form, estado: e.target.value })}
-        />
+        {modo === "baterias" && (
+          <Input
+            label="Estado"
+            value={form.estado}
+            onChange={(e) => setForm({ ...form, estado: e.target.value })}
+          />
+        )}
 
         <div className="inventarioModalFooter">
           <Button variant="secondary" onClick={onClose} type="button">

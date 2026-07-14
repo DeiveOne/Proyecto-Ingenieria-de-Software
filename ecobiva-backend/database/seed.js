@@ -1,4 +1,6 @@
-require("dotenv").config();
+require('dotenv').config({
+    path: require('path').join(__dirname, '../.env')
+});
 const mysql = require("mysql2/promise");
 const bcrypt = require("bcrypt");
 
@@ -1112,6 +1114,12 @@ async function seed() {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
   });
+
+  const [db] = await connection.execute("SELECT DATABASE() AS db");
+console.log(db);
+
+const [tablas] = await connection.execute("SHOW TABLES");
+console.table(tablas);
 
   try {
     await connection.beginTransaction();

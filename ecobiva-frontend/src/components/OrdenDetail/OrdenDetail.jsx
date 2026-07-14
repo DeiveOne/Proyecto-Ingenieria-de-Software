@@ -7,6 +7,8 @@ import DiagnosticoPanel from "../DiagnosticoPanel/DiagnosticoPanel";
 import AprobacionPanel from "../AprobacionPanel/AprobacionPanel";
 import FacturaPanel from "../FacturaPanel/FacturaPanel";
 import AutoasignacionPanel from "../AutoasignacionPanel/AutoasignacionPanel";
+import EvidenciasOrden from "../EvidenciaIngreso/EvidenciasOrden";
+import GarantiaPanel from "../GarantiaPanel/GarantiaPanel";
 import { useAuth } from "../../context/AuthContext";
 
 export const ESTADO_LABELS = {
@@ -184,6 +186,10 @@ export default function OrdenDetail({ orden, onCambiarEstado, onOrdenActualizada
       <AprobacionPanel orden={orden} onOrdenActualizada={onOrdenActualizada} />
 
       <FacturaPanel orden={orden} onOrdenActualizada={onOrdenActualizada} />
+
+      <EvidenciasOrden idOrden={orden.idOrden} />
+
+      <GarantiaPanel orden={orden} />
 
       <section className="detailSection">
         <h3>Historial de Estado</h3>

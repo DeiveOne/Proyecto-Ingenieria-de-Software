@@ -12,9 +12,12 @@ import Clientes from "../pages/Clientes/Clientes";
 import Vehiculos from "../pages/Vehiculos/Vehiculos";
 import Tecnicos from "../pages/Tecnicos/Tecnicos";
 import Inventario from "../pages/Inventario/Inventario";
+import AlertasStock from "../pages/AlertasStock/AlertasStock";
+import TerminosGarantia from "../pages/TerminosGarantia/TerminosGarantia";
 import Ordenes from "../pages/Ordenes/Ordenes";
 import Reportes from "../pages/Reportes/Reportes";
 import Configuracion from "../pages/Configuracion/Configuracion";
+
 
 // Backend
 import Usuarios from "../pages/Usuarios/Usuarios";
@@ -24,6 +27,7 @@ import Auditoria from "../pages/Auditoria/Auditoria";
 import Empleados from "../pages/Empleados/Empleados";
 import HistorialCargo from "../pages/HistorialCargo/HistorialCargo";
 import Nomina from "../pages/Nomina/Nomina";
+
 
 export default function AppRoutes() {
   return (
@@ -50,6 +54,8 @@ export default function AppRoutes() {
 
           <Route path="/inventario" element={<Inventario />} />
 
+          <Route path="/alertas-stock" element={<AlertasStock />} />
+
           <Route path="/ordenes" element={<Ordenes />} />
 
           <Route path="/reportes" element={<Reportes />} />
@@ -73,6 +79,8 @@ export default function AppRoutes() {
           <Route path="/historial-cargo" element={<HistorialCargo />} />
 
           <Route path="/nomina" element={<Nomina />} />
+
+          <Route path="/terminos-garantia" element={<TerminosGarantia />} />
         </Route>
       </Route>
 

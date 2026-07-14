@@ -14,6 +14,10 @@ export default function Input({
   onChange,
 
   error,
+
+  readOnly = false,
+
+  disabled = false,
 }) {
   return (
     <div className="inputGroup">
@@ -28,6 +32,8 @@ export default function Input({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        readOnly={readOnly}
+        disabled={disabled}
       />
 
       {error && <p className="inputError">{error}</p>}

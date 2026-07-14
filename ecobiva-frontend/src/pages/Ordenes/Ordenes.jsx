@@ -1,5 +1,6 @@
 import "./Ordenes.css";
 
+
 import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import PageHeader from "../../components/PageHeader/PageHeader";
@@ -19,6 +20,12 @@ import {
   eliminarOrden,
 } from "../../services/ordenService";
 
+import {
+  crearEvidencia,
+  subirFoto,
+} from "../../services/evidenciaService";
+
+
 export default function Ordenes() {
   const [ordenes, setOrdenes] = useState([]);
   const [busqueda, setBusqueda] = useState("");
@@ -28,6 +35,16 @@ export default function Ordenes() {
   const [detalleOpen, setDetalleOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [observacionesIngreso, setObservacionesIngreso] = useState("");
+  const [fotosIngreso, setFotosIngreso] = useState([]);
+
+    const cerrarModal = () => {
+    setModalOpen(false);
+    setOrdenEditar(null);
+    limpiarEvidencias();
+  };
+
+
 
   useEffect(() => {
     cargarOrdenes();
@@ -43,24 +60,78 @@ export default function Ordenes() {
     }
   };
 
-  const guardarOrden = async (orden) => {
+  const guardarOrden = async ({ orden, evidencia }) => {
     try {
+
       if (ordenEditar?.idOrden) {
-        await actualizarOrden(ordenEditar.idOrden, orden);
+
+        await actualizarOrden(
+          ordenEditar.idOrden,
+          orden
+        );
+
       } else {
-        await crearOrden(orden);
+
+        // Crear la orden
+        const nuevaOrden = await crearOrden(orden);
+
+        // Crear la evidencia
+        const nuevaEvidencia = await crearEvidencia({
+
+          idOrden: nuevaOrden.idOrden,
+
+          observaciones: evidencia.observaciones
+
+        });
+
+        // Subir fotografías
+        if (evidencia.fotos.length > 0) {
+
+          for (const foto of evidencia.fotos) {
+
+            await subirFoto(
+              nuevaEvidencia.idEvidencia,
+              foto.archivo
+            );
+
+          }
+
+        }
+
       }
+
       cerrarModal();
+
       await cargarOrdenes();
+
     } catch (error) {
+
       console.error(error);
-      alert(error?.response?.data?.error || "No fue posible guardar la orden.");
+
+      alert(
+        error?.response?.data?.error ||
+        "No fue posible guardar la orden."
+      );
+
     }
   };
 
-  const cerrarModal = () => {
-    setModalOpen(false);
-    setOrdenEditar(null);
+  const limpiarEvidencias = () => {
+
+    fotosIngreso.forEach(f => {
+
+      if (f.preview) {
+
+        URL.revokeObjectURL(f.preview);
+
+      }
+
+    });
+
+    setObservacionesIngreso("");
+
+    setFotosIngreso([]);
+
   };
 
   const verDetalle = async (orden) => {
@@ -84,7 +155,7 @@ export default function Ordenes() {
       console.error(error);
       alert(
         error?.response?.data?.error ||
-          "No fue posible cambiar el estado de la orden.",
+        "No fue posible cambiar el estado de la orden.",
       );
     }
   };

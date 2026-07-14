@@ -6,9 +6,9 @@ const pool = require('../config/db');
  */
 async function registrar({ idUsuario, accion, modulo, detalle, ipOrigen }) {
     await pool.query(`
-        INSERT INTO LogAuditoria (idUsuario, accion, modulo, detalle, ipOrigen)
-        VALUES (?, ?, ?, ?, ?)
-    `, [idUsuario || null, accion, modulo, detalle || null, ipOrigen || null]);
+        INSERT INTO LogAuditoria (idUsuario, accion, modulo, detalle)
+        VALUES (?, ?, ?, ?)
+    `, [idUsuario || null, accion, modulo, detalle || null]);
 }
 
 /**
@@ -28,11 +28,11 @@ async function consultar({ idUsuario, modulo, desde, hasta, pagina = 1, tamanoPa
         valores.push(modulo);
     }
     if (desde) {
-        condiciones.push('l.fechaHora >= ?');
+        condiciones.push('l.fecha >= ?');
         valores.push(desde);
     }
     if (hasta) {
-        condiciones.push('l.fechaHora <= ?');
+        condiciones.push('l.fecha <= ?');
         valores.push(hasta);
     }
 
@@ -41,11 +41,11 @@ async function consultar({ idUsuario, modulo, desde, hasta, pagina = 1, tamanoPa
 
     const [rows] = await pool.query(`
         SELECT l.idLog, l.idUsuario, u.correo AS correoUsuario,
-               l.accion, l.modulo, l.detalle, l.ipOrigen, l.fechaHora
+               l.accion, l.modulo, l.detalle, NULL AS ipOrigen, l.fecha AS fechaHora
         FROM LogAuditoria l
         LEFT JOIN Usuario u ON u.idUsuario = l.idUsuario
         ${where}
-        ORDER BY l.fechaHora DESC
+        ORDER BY l.fecha DESC
         LIMIT ? OFFSET ?
     `, [...valores, tamanoPagina, offset]);
 

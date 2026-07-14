@@ -1,7 +1,6 @@
 import "./ProductoDetail.css";
 
 import DataField from "../DataField/DataField";
-import StatusBadge from "../StatusBadge/StatusBadge";
 
 export default function ProductoDetail({ producto }) {
 
@@ -16,11 +15,6 @@ export default function ProductoDetail({ producto }) {
                 <h3>Información del Producto</h3>
 
                 <div className="detailGrid">
-
-                    <DataField
-                        label="Código"
-                        value={producto.codigo}
-                    />
 
                     <DataField
                         label="Producto"
@@ -39,32 +33,18 @@ export default function ProductoDetail({ producto }) {
 
                     <DataField
                         label="Precio"
-                        value={producto.precio}
+                        value={producto.precioUnitario}
                     />
 
                     <DataField
                         label="Stock"
-                        value={producto.stock}
+                        value={producto.stockActual}
                     />
 
                     <DataField
                         label="Stock mínimo"
-                        value={producto.minimo}
+                        value={producto.stockMinimo}
                     />
-
-                    <div>
-
-                        <span className="fieldTitle">
-
-                            Estado
-
-                        </span>
-
-                        <StatusBadge
-                            status={producto.estado}
-                        />
-
-                    </div>
 
                 </div>
 

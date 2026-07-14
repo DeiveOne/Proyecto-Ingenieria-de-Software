@@ -62,7 +62,7 @@ export default function Vehiculos() {
     const cerrarModal = () => {
       setAbrirModal(false);
       setVehiculoEditar(null);
-    };
+    }; 
 
     const confirmarEliminarVehiculo = async () => {
       try {

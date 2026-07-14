@@ -68,7 +68,7 @@ export default function Inventario() {
       setConfirmDelete(false);
     } catch (err) {
       console.error(err);
-      setError("No se pudo eliminar el registro.");
+      setError(err.response?.data?.error || "No se pudo eliminar el registro.");
     }
   }
 

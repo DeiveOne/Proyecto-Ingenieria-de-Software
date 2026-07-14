@@ -36,6 +36,8 @@ export default function DiagnosticoPanel({ orden, onOrdenActualizada }) {
   const [cargando, setCargando] = useState(true);
   const [tipoDiagnostico, setTipoDiagnostico] = useState("superficial");
   const [costoDiagnostico, setCostoDiagnostico] = useState("");
+  const [subtotalManoObra, setSubtotalManoObra] = useState("");
+  const [subtotalRepuestos, setSubtotalRepuestos] = useState("");
   const [filas, setFilas] = useState([{ item: "", observacion: "" }]);
   const [guardando, setGuardando] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -52,6 +54,8 @@ export default function DiagnosticoPanel({ orden, onOrdenActualizada }) {
       setDiagnostico(data);
       setTipoDiagnostico(data.tipoDiagnostico || "superficial");
       setCostoDiagnostico(data.costoDiagnostico ?? "");
+      setSubtotalManoObra(data.subtotalManoObra ?? "");
+      setSubtotalRepuestos(data.subtotalRepuestos ?? "");
       const filasExistentes = checklistAFilas(data.checklist);
       setFilas(
         filasExistentes.length > 0
@@ -89,6 +93,8 @@ export default function DiagnosticoPanel({ orden, onOrdenActualizada }) {
         tipoDiagnostico,
         costoDiagnostico:
           tipoDiagnostico === "profundo" ? Number(costoDiagnostico || 0) : 0,
+        subtotalManoObra: Number(subtotalManoObra || 0),
+        subtotalRepuestos: Number(subtotalRepuestos || 0),
       };
       const actualizado = await guardarDiagnostico(orden.idOrden, payload);
       setDiagnostico(actualizado);
@@ -187,6 +193,14 @@ export default function DiagnosticoPanel({ orden, onOrdenActualizada }) {
             />
           </div>
         )}
+        <div className="inputGroup">
+          <label>Subtotal mano de obra</label>
+          <input type="number" min="0" value={subtotalManoObra} onChange={(e) => setSubtotalManoObra(e.target.value)} disabled={!puedeEditarAhora} placeholder="0" />
+        </div>
+        <div className="inputGroup">
+          <label>Subtotal repuestos</label>
+          <input type="number" min="0" value={subtotalRepuestos} onChange={(e) => setSubtotalRepuestos(e.target.value)} disabled={!puedeEditarAhora} placeholder="0" />
+        </div>
       </div>
 
       <div className="checklistWrapper">

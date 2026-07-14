@@ -6,6 +6,7 @@ import { obtenerClientes, obtenerCliente } from "../../services/clienteService";
 import { listarUsuarios } from "../../services/usuarioService";
 import { listarTecnicos } from "../../services/tecnicoService";
 import "./OrdenModal.css";
+import EvidenciaIngreso from "../EvidenciaIngreso/EvidenciaIngreso";
 
 const inicializarOrden = () => ({
   idCliente: "",
@@ -23,6 +24,10 @@ export default function OrdenModal({ open, ordenEditar, onClose, onSave }) {
   const [vehiculos, setVehiculos] = useState([]);
   const [tecnicos, setTecnicos] = useState([]);
   const [asesores, setAsesores] = useState([]);
+
+  const [observacionesIngreso, setObservacionesIngreso] = useState("");
+
+  const [fotosIngreso, setFotosIngreso] = useState([]);
 
   const clienteSeleccionado = clientes.find(
     (cliente) => String(cliente.idCliente) === String(orden.idCliente),
@@ -85,7 +90,9 @@ export default function OrdenModal({ open, ordenEditar, onClose, onSave }) {
   const cargarTecnicos = async () => {
     try {
       const data = await listarTecnicos();
-      const tecnicosData = data || [];
+      // El endpoint responde { ok, data: [...] }; aceptamos tambi\u00e9n una
+      // lista directa para mantener el componente compatible con ambos formatos.
+      const tecnicosData = Array.isArray(data) ? data : data?.data || [];
       // Solo técnicos activos y con cuenta de usuario (Orden.idTecnico
       // referencia Usuario.idUsuario, así que sin cuenta no se pueden asignar).
       setTecnicos(
@@ -148,8 +155,14 @@ export default function OrdenModal({ open, ordenEditar, onClose, onSave }) {
           : Number(orden.nivelBateriaIngreso),
     };
 
-    await onSave(payload);
-    onClose();
+    await onSave({
+      orden: payload,
+      evidencia: {
+        observaciones: observacionesIngreso,
+        fotos: fotosIngreso
+      }
+    });
+
   };
 
   return (
@@ -281,6 +294,13 @@ export default function OrdenModal({ open, ordenEditar, onClose, onSave }) {
 
         </div>
 
+        <EvidenciaIngreso
+          observaciones={observacionesIngreso}
+          setObservaciones={setObservacionesIngreso}
+          fotos={fotosIngreso}
+          setFotos={setFotosIngreso}
+        />
+
         <div className="ordenModalFooter">
           <Button variant="secondary" onClick={onClose}>
             Cancelar
@@ -292,4 +312,6 @@ export default function OrdenModal({ open, ordenEditar, onClose, onSave }) {
       </div>
     </Modal>
   );
+
+
 }

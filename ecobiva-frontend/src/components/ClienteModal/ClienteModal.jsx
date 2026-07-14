@@ -28,8 +28,6 @@ export default function ClienteModal({
 
         telefono:"",
 
-        direccion:"",
-
         preferenciaNotificacion:"Correo"
 
     });
@@ -45,7 +43,6 @@ export default function ClienteModal({
                 documento: clienteEditar.documento || "",
                 correo: clienteEditar.correo || "",
                 telefono: clienteEditar.telefono || "",
-                direccion: clienteEditar.direccion || "",
                 preferenciaNotificacion: clienteEditar.preferenciaNotificacion || "Correo"
             });
             setErrores({});
@@ -57,7 +54,6 @@ export default function ClienteModal({
             documento:"",
             correo:"",
             telefono:"",
-            direccion:"",
             preferenciaNotificacion:"Correo"
         });
         setErrores({});
@@ -212,21 +208,11 @@ export default function ClienteModal({
 
                     <Input
 
-                        label="Dirección"
+                        label="Ciudad"
 
-                        value={cliente.direccion}
+                        value="Bogotá D.C."
 
-                        onChange={(e)=>
-
-                            setCliente({
-
-                                ...cliente,
-
-                                direccion:e.target.value
-
-                            })
-
-                        }
+                        readOnly
 
                     />
 

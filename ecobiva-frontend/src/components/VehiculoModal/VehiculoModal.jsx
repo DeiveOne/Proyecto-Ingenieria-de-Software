@@ -12,14 +12,10 @@ export default function VehiculoModal({ open, vehiculoEditar, onClose, onSave })
         marca: "",
         modelo: "",
         anio: "",
-        color: "",
-        kilometraje: "",
-        combustible: "",
         tipoVehiculo: "",
         serialMotor: "",
         especificacionesBateria: "",
-        idCliente: "",
-        estado: ""
+        idCliente: ""
     });
 
     const [clientes, setClientes] = useState([]);
@@ -45,14 +41,10 @@ export default function VehiculoModal({ open, vehiculoEditar, onClose, onSave })
                 marca: vehiculoEditar.marca || "",
                 modelo: vehiculoEditar.modelo || "",
                 anio: vehiculoEditar.anio || "",
-                color: vehiculoEditar.color || "",
-                kilometraje: vehiculoEditar.kilometraje || "",
-                combustible: vehiculoEditar.combustible || "",
                 tipoVehiculo: vehiculoEditar.tipoVehiculo || "",
                 serialMotor: vehiculoEditar.serialMotor || "",
                 especificacionesBateria: vehiculoEditar.especificacionesBateria || "",
-                idCliente: vehiculoEditar.idCliente || "",
-                estado: vehiculoEditar.estado || ""
+                idCliente: vehiculoEditar.idCliente || ""
             });
             setErrores({});
             return;
@@ -63,14 +55,10 @@ export default function VehiculoModal({ open, vehiculoEditar, onClose, onSave })
             marca: "",
             modelo: "",
             anio: "",
-            color: "",
-            kilometraje: "",
-            combustible: "",
             tipoVehiculo: "",
             serialMotor: "",
             especificacionesBateria: "",
-            idCliente: "",
-            estado: ""
+            idCliente: ""
         });
         setErrores({});
     }, [open, vehiculoEditar]);
@@ -131,24 +119,6 @@ export default function VehiculoModal({ open, vehiculoEditar, onClose, onSave })
                     />
 
                     <Input
-                        label="Color"
-                        value={vehiculo.color}
-                        onChange={(e) => setVehiculo({ ...vehiculo, color: e.target.value })}
-                    />
-
-                    <Input
-                        label="Kilometraje"
-                        value={vehiculo.kilometraje}
-                        onChange={(e) => setVehiculo({ ...vehiculo, kilometraje: e.target.value })}
-                    />
-
-                    <Input
-                        label="Combustible"
-                        value={vehiculo.combustible}
-                        onChange={(e) => setVehiculo({ ...vehiculo, combustible: e.target.value })}
-                    />
-
-                    <Input
                         label="Tipo de Vehículo"
                         value={vehiculo.tipoVehiculo}
                         onChange={(e) => setVehiculo({ ...vehiculo, tipoVehiculo: e.target.value })}
@@ -184,11 +154,6 @@ export default function VehiculoModal({ open, vehiculoEditar, onClose, onSave })
                         {errores.idCliente && <p className="inputError">{errores.idCliente}</p>}
                     </div>
 
-                    <Input
-                        label="Estado"
-                        value={vehiculo.estado}
-                        onChange={(e) => setVehiculo({ ...vehiculo, estado: e.target.value })}
-                    />
                 </div>
 
                 <div className="vehiculoFooter">
