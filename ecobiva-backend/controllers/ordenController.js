@@ -46,12 +46,19 @@ async function obtenerHistorial(req, res) {
 }
 
 async function crear(req, res) {
-  const { idCliente, idVehiculo } = req.body;
+  const { idCliente, idVehiculo, motivoIngreso } = req.body;
 
   if (!idCliente || !idVehiculo) {
     return res
       .status(400)
       .json({ error: "Cliente y vehículo son obligatorios" });
+  }
+
+  if (!motivoIngreso || !motivoIngreso.trim()) {
+    return res.status(400).json({
+      error:
+        "El motivo de ingreso es obligatorio (con qué se guía el técnico para revisar el vehículo).",
+    });
   }
 
   try {

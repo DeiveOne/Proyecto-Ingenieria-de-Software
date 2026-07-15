@@ -1,13 +1,18 @@
 import "./ActionButtons.css";
 
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
-
+import {
+  FaEye,
+  FaEdit,
+  FaTrash,
+  FaUndoAlt,
+  FaStethoscope,
+} from "react-icons/fa";
 export default function ActionButtons({
   onView,
-
   onEdit,
-
   onDelete,
+  onRestore,
+  onDiagnosticar,
 }) {
   return (
     <div className="actionButtons">
@@ -24,8 +29,32 @@ export default function ActionButtons({
       )}
 
       {onDelete && (
-        <button className="accion eliminar" onClick={onDelete} title="Eliminar">
+        <button
+          className="accion eliminar"
+          onClick={onDelete}
+          title="Desactivar"
+        >
           <FaTrash />
+        </button>
+      )}
+
+      {onRestore && (
+        <button
+          className="accion restaurar"
+          onClick={onRestore}
+          title="Reactivar"
+        >
+          <FaUndoAlt />
+        </button>
+      )}
+
+      {onDiagnosticar && (
+        <button
+          className="accion diagnosticar"
+          onClick={onDiagnosticar}
+          title="Diagnosticar"
+        >
+          <FaStethoscope />
         </button>
       )}
     </div>

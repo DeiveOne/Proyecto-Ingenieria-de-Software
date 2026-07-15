@@ -18,7 +18,7 @@ router.get(
   vehiculoController.obtenerPorId,
 );
 router.post("/", verificarRol(["Admin", "Asesor"]), vehiculoController.crear);
-router.put(
+router.patch(
   "/:id",
   verificarRol(["Admin", "Asesor"]),
   vehiculoController.actualizar,
@@ -28,5 +28,9 @@ router.delete(
   verificarRol(["Admin", "Asesor"]),
   vehiculoController.eliminar,
 );
-
+router.put(
+  "/:id/reactivar",
+  verificarRol(["Admin", "Asesor"]),
+  vehiculoController.reactivar,
+);
 module.exports = router;

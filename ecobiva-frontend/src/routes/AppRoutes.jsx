@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
-import ProtectedRoute from "./ProtectedRoute"; // ajusta la ruta
-import MainLayout from "../layouts/MainLayout"; // ajusta la ruta
+import ProtectedRoute from "./ProtectedRoute";
+import MainLayout from "../layouts/MainLayout";
+
 // Auth
 import Login from "../pages/Login/Login";
 import Recuperacion from "../pages/Recuperacion/Recuperacion";
@@ -15,6 +16,7 @@ import Inventario from "../pages/Inventario/Inventario";
 import AlertasStock from "../pages/AlertasStock/AlertasStock";
 import TerminosGarantia from "../pages/TerminosGarantia/TerminosGarantia";
 import Ordenes from "../pages/Ordenes/Ordenes";
+import Diagnosticos from "../pages/Diagnosticos/Diagnosticos";
 import Reportes from "../pages/Reportes/Reportes";
 import Configuracion from "../pages/Configuracion/Configuracion";
 
@@ -23,6 +25,7 @@ import Configuracion from "../pages/Configuracion/Configuracion";
 import Usuarios from "../pages/Usuarios/Usuarios";
 import Permisos from "../pages/Permisos/Permisos";
 import Auditoria from "../pages/Auditoria/Auditoria";
+
 // RRHH
 import Empleados from "../pages/Empleados/Empleados";
 import HistorialCargo from "../pages/HistorialCargo/HistorialCargo";
@@ -40,7 +43,7 @@ export default function AppRoutes() {
 
       <Route path="/recuperar" element={<Recuperacion />} />
 
-      {/* Todas las rutas privadas usan MainLayout */}
+      {/* Privadas */}
 
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
@@ -58,9 +61,15 @@ export default function AppRoutes() {
 
           <Route path="/ordenes" element={<Ordenes />} />
 
+          <Route path="/diagnosticos" element={<Diagnosticos />} />
+
+          <Route path="/diagnosticos/:idOrden" element={<Diagnosticos />} />
+
           <Route path="/reportes" element={<Reportes />} />
 
           <Route path="/configuracion" element={<Configuracion />} />
+
+          <Route path="/alertas-stock" element={<AlertasStock />} />
         </Route>
       </Route>
 
@@ -83,8 +92,6 @@ export default function AppRoutes() {
           <Route path="/terminos-garantia" element={<TerminosGarantia />} />
         </Route>
       </Route>
-
-      {/* Ruta inexistente */}
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
